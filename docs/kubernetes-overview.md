@@ -460,7 +460,7 @@ Even for local clusters, good habits matter:
 | Official Kubernetes Docs | https://kubernetes.io/docs |
 | Interactive Tutorial (official) | https://kubernetes.io/docs/tutorials |
 | Kubernetes the Hard Way (Kelsey Hightower) | https://github.com/kelseyhightower/kubernetes-the-hard-way |
-| CNCF Landscape | https://landscape.cncf.io |
+| CNCF Landscape | https://landscape.cncf.io <br/><small>The Cloud Native Computing Foundation (CNCF) Landscape is an interactive map and directory of virtually every open-source and commercial tool in the cloud-native ecosystem. It's maintained by the CNCF, the same nonprofit that stewards Kubernetes itself.</small>|
 | CIS Kubernetes Benchmark | https://www.cisecurity.org/benchmark/kubernetes |
 | NSA/CISA Kubernetes Hardening Guide | https://media.defense.gov/2022/Aug/29/2003066362/-1/-1/0/CTR_KUBERNETES_HARDENING_GUIDANCE_1.2_20220829.PDF |
 | Helm (Package Manager) | https://helm.sh |
