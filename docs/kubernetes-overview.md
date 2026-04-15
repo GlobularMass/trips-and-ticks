@@ -348,8 +348,11 @@ spec:
 ```
 
 ```bash
+# Start minikube
+minikube start --driver=docker
+
 # Apply the manifest
-kubectl apply -f deployment.yaml
+kubectl apply -f kubernetes-overview/deployment.yaml
 
 # View the result
 kubectl get deployments
@@ -468,6 +471,9 @@ Even for local clusters, good habits matter:
 
 *Last updated: April 2026. Kubernetes evolves quickly — always check the official docs for the version you are running.*
 
-<small>Commits To This Document:
+<small>
+<b>Commits To This Document:</b></br>
 1. Initial generation with Claude Sonnet 4.6 Prompt: Help me understand Kubernetes.  How does it compare to Docker?  What is the cost structure to use it and is there a free local development version?  How might I set up a local development instance?  What security and privacy considerations should I have when installing or using it? Present it in a format which can be used in a GitHub project wiki.
-  * After reviewing first version the followup prompt was given: In the steps explaining how to set up a local development environment I notice the windows commands use "choco" which is not a default terminal command in windows.  Use only standard environment commands if possible, if not possible then provide relevant instructions on how to install and set up the non-standard/built-in command. Initial version not commited for reasons.</small>
+
+* After reviewing first version the followup prompt was given: In the steps explaining how to set up a local development environment I notice the windows commands use "choco" which is not a default terminal command in windows.  Use only standard environment commands if possible, if not possible then provide relevant instructions on how to install and set up the non-standard/built-in command. Initial version not commited for reasons.
+</small>
