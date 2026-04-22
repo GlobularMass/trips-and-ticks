@@ -1,0 +1,26 @@
+# MongoDB Configuration Template
+# Copy this file to mongod.conf and uncomment/modify settings as needed
+# Then mount it in docker-compose.yml:
+#   volumes:
+#     - ./mongodb/mongodb_config/mongod.conf:/etc/mongod.conf
+# And update the command section to use the config file:
+#   command: --config /etc/mongod.conf
+
+net:
+  port: 27017
+  bindIp: 0.0.0.0
+  
+security:
+  authorization: "enabled"
+
+storage:
+  dbPath: /data/db
+  engine: wiredTiger
+
+systemLog:
+  destination: file
+  path: /var/log/mongodb/mongod.log
+  logAppend: true
+  logRotate: reopen
+  # Optional: Set log level (default: info)
+  # verbosity: 0  # 0=info, 1=debug, 2=debug (verbose), etc.

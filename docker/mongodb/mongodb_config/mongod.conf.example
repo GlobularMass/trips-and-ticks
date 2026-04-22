@@ -1,0 +1,36 @@
+# MongoDB Configuration File
+# This is an example MongoDB configuration file (mongod.conf format)
+# Uncomment and customize as needed
+# For more information, see: https://www.mongodb.com/docs/manual/reference/configuration-options/
+
+# ==== Network and Protocol ====
+# net:
+#   port: 27017
+#   bindIp: 0.0.0.0
+
+# ==== Security ====
+# security:
+#   authorization: "enabled"
+
+# ==== Storage ====
+# storage:
+#   dbPath: /data/db
+#   engine: wiredTiger
+#   wiredTiger:
+#     engineConfig:
+#       cacheSizeGB: 2
+
+# ==== Logging ====
+# systemLog:
+#   destination: file
+#   path: /var/log/mongodb/mongod.log
+#   logAppend: true
+#   logRotate: reopen
+
+# ==== Process Management ====
+# processManagement:
+#   fork: false
+#   pidFilePath: /var/run/mongodb/mongod.pid
+
+# Note: Most settings can be configured via command-line arguments in docker-compose.yml
+# This file is provided as a reference for advanced configurations

@@ -1,0 +1,40 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb-container
+    restart: unless-stopped
+    env_file: ./mongodb/mongodb_config/.env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USER:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-changeme}
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME:-myapp}
+    ports:
+      - "27017:27017"
+    volumes:
+      # Change ./mongodb/mongodb_data to your desired local folder path
+      - ./mongodb/mongodb_data:/data/db
+      - ./mongodb/mongodb_config:/data/configdb
+      - ./mongodb/mongodb_logs:/var/log/mongodb
+    networks:
+      - mongodb-network
+    command: 
+      - --auth
+      - --bind_ip_all
+      - --logpath=/var/log/mongodb/mongod.log
+      - --logappend
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200m"      # Maximum size of log file before rotation
+        max-file: "3"         # Keep maximum 3 rotated log files
+        labels: "mongodb"
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+
+networks:
+  mongodb-network:
+    driver: bridge

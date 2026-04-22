@@ -1,0 +1,26 @@
+# Environment variables (contains sensitive credentials)
+.env
+.env.local
+.env.*.local
+
+# MongoDB data (large files, should not be in version control)
+mongodb_data/*
+!mongodb_data/.gitkeep
+mongodb_config/*
+!mongodb_config/*.example
+!mongodb_config/*.template
+mongodb_logs/*
+!mongodb_logs/.gitkeep
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
