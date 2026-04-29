@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: trips-ticks
+  labels:
+    name: trips-ticks
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: trips-ticks-dev
+  labels:
+    name: trips-ticks-dev

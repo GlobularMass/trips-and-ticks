@@ -1,0 +1,179 @@
+---
+# Airflow Webserver Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-webserver
+  namespace: trips-ticks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-webserver
+  template:
+    metadata:
+      labels:
+        app: airflow-webserver
+    spec:
+      serviceAccountName: airflow
+      containers:
+      - name: airflow-webserver
+        image: apache/airflow:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+          name: airflow-web
+        env:
+        - name: AIRFLOW_HOME
+          value: /home/airflow
+        - name: AIRFLOW__CORE__DAGS_FOLDER
+          value: /home/airflow/dags
+        - name: AIRFLOW__CORE__LOGS_FOLDER
+          value: /home/airflow/logs
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: LocalExecutor
+        - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+          value: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+        - name: AIRFLOW__CORE__FERNET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: airflow-credentials
+              key: fernet-key
+        - name: AIRFLOW__WEBSERVER__SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: airflow-credentials
+              key: webserver-secret-key
+        - name: AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX
+          value: "True"
+        - name: AIRFLOW__CORE__LOAD_EXAMPLES
+          value: "False"
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "500m"
+          limits:
+            memory: "2Gi"
+            cpu: "1000m"
+        volumeMounts:
+        - name: airflow-dags
+          mountPath: /home/airflow/dags
+        - name: airflow-logs
+          mountPath: /home/airflow/logs
+        - name: airflow-config
+          mountPath: /home/airflow/config
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        command:
+          - airflow
+          - webserver
+      volumes:
+      - name: airflow-dags
+        persistentVolumeClaim:
+          claimName: airflow-dags-pvc
+      - name: airflow-logs
+        persistentVolumeClaim:
+          claimName: airflow-logs-pvc
+      - name: airflow-config
+        configMap:
+          name: airflow-config
+---
+# Airflow Webserver Service
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-webserver
+  namespace: trips-ticks
+  labels:
+    app: airflow-webserver
+spec:
+  type: LoadBalancer
+  selector:
+    app: airflow-webserver
+  ports:
+  - port: 8080
+    targetPort: 8080
+    protocol: TCP
+    name: airflow-web
+---
+# Airflow Scheduler Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-scheduler
+  namespace: trips-ticks
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: airflow-scheduler
+  template:
+    metadata:
+      labels:
+        app: airflow-scheduler
+    spec:
+      serviceAccountName: airflow
+      containers:
+      - name: airflow-scheduler
+        image: apache/airflow:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: AIRFLOW_HOME
+          value: /home/airflow
+        - name: AIRFLOW__CORE__DAGS_FOLDER
+          value: /home/airflow/dags
+        - name: AIRFLOW__CORE__LOGS_FOLDER
+          value: /home/airflow/logs
+        - name: AIRFLOW__CORE__EXECUTOR
+          value: LocalExecutor
+        - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+          value: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+        - name: AIRFLOW__CORE__FERNET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: airflow-credentials
+              key: fernet-key
+        - name: AIRFLOW__WEBSERVER__SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: airflow-credentials
+              key: webserver-secret-key
+        - name: AIRFLOW__CORE__LOAD_EXAMPLES
+          value: "False"
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "250m"
+          limits:
+            memory: "1Gi"
+            cpu: "500m"
+        volumeMounts:
+        - name: airflow-dags
+          mountPath: /home/airflow/dags
+        - name: airflow-logs
+          mountPath: /home/airflow/logs
+        - name: airflow-config
+          mountPath: /home/airflow/config
+        command:
+          - airflow
+          - scheduler
+      volumes:
+      - name: airflow-dags
+        persistentVolumeClaim:
+          claimName: airflow-dags-pvc
+      - name: airflow-logs
+        persistentVolumeClaim:
+          claimName: airflow-logs-pvc
+      - name: airflow-config
+        configMap:
+          name: airflow-config

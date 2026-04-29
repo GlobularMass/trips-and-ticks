@@ -1,0 +1,173 @@
+# Helm Chart Values for Trips and Ticks
+# Use with: helm install trips-ticks ./helm -f helm/values.yaml
+
+# Global settings
+global:
+  environment: production
+  namespace: trips-ticks
+  imagePullPolicy: IfNotPresent
+
+# MongoDB Configuration
+mongodb:
+  enabled: true
+  replicas: 1
+  image:
+    repository: mongo
+    tag: "6.0"
+  storage:
+    size: 10Gi
+    className: local-storage
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  persistence:
+    enabled: true
+    mountPath: /data/db
+  credentials:
+    username: admin
+    password: change-me-in-production
+
+# PostgreSQL Configuration
+postgresql:
+  enabled: true
+  replicas: 1
+  image:
+    repository: postgres
+    tag: "15-alpine"
+  storage:
+    size: 20Gi
+    className: local-storage
+  resources:
+    requests:
+      memory: "512Mi"
+      cpu: "250m"
+    limits:
+      memory: "1Gi"
+      cpu: "500m"
+  persistence:
+    enabled: true
+    mountPath: /var/lib/postgresql/data
+  database:
+    name: trips_ticks_analytics
+    user: postgres
+    password: change-me-in-production
+  airflow:
+    user: airflow
+    password: airflow
+
+# Airflow Configuration
+airflow:
+  enabled: true
+  webserver:
+    replicas: 1
+    image:
+      repository: apache/airflow
+      tag: latest
+    port: 8080
+    resources:
+      requests:
+        memory: "1Gi"
+        cpu: "500m"
+      limits:
+        memory: "2Gi"
+        cpu: "1000m"
+  scheduler:
+    replicas: 1
+    image:
+      repository: apache/airflow
+      tag: latest
+    resources:
+      requests:
+        memory: "512Mi"
+        cpu: "250m"
+      limits:
+        memory: "1Gi"
+        cpu: "500m"
+  dags:
+    persistence:
+      enabled: true
+      size: 5Gi
+      className: local-storage
+      mountPath: /home/airflow/dags
+  logs:
+    persistence:
+      enabled: true
+      size: 10Gi
+      className: local-storage
+      mountPath: /home/airflow/logs
+  executor: LocalExecutor
+  credentials:
+    username: airflow
+    password: airflow
+
+# Network Configuration
+network:
+  mongodb:
+    port: 27017
+    serviceType: ClusterIP
+  postgresql:
+    port: 5432
+    serviceType: ClusterIP
+  airflow:
+    port: 8080
+    serviceType: LoadBalancer
+
+# Health Checks
+healthChecks:
+  mongodb:
+    enabled: true
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 5
+  postgresql:
+    enabled: true
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 10
+    readinessProbe:
+      initialDelaySeconds: 10
+      periodSeconds: 5
+  airflow:
+    enabled: true
+    livenessProbe:
+      initialDelaySeconds: 30
+      periodSeconds: 30
+    readinessProbe:
+      initialDelaySeconds: 15
+      periodSeconds: 10
+
+# RBAC Configuration
+rbac:
+  enabled: true
+  serviceAccount:
+    create: true
+    name: airflow
+  clusterRole:
+    create: true
+
+# Network Policies
+networkPolicy:
+  enabled: true
+  policyTypes:
+    - Ingress
+    - Egress
+
+# Monitoring (optional)
+monitoring:
+  enabled: false
+  prometheus:
+    enabled: false
+  grafana:
+    enabled: false
+
+# Logging
+logging:
+  level: INFO
+  format: json

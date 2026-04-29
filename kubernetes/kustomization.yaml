@@ -1,0 +1,89 @@
+---
+# Kustomization file for Kubernetes manifests
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: trips-ticks
+
+# Label all resources
+commonLabels:
+  app: trips-ticks
+  managed-by: kustomize
+
+# Include all manifests
+resources:
+  - manifests/rbac/rbac.yaml
+  - manifests/config/configmaps.yaml
+  - manifests/config/secrets.yaml
+  - manifests/storage/volumes.yaml
+  - manifests/services/mongodb.yaml
+  - manifests/services/postgres.yaml
+  - manifests/services/airflow.yaml
+
+# ConfigMap generator for application config
+configMapGenerator:
+  - name: app-env-config
+    literals:
+      - ENVIRONMENT=production
+      - LOG_LEVEL=INFO
+      - DEBUG=False
+
+# Patches for common configurations
+patches:
+  - target:
+      kind: Deployment
+      labelSelector: "app=trips-ticks"
+    patch: |-
+      - op: add
+        path: /spec/template/spec/securityContext
+        value:
+          runAsNonRoot: true
+          runAsUser: 1000
+          fsGroup: 1000
+
+# Vars for templating
+vars:
+  - name: MONGODB_HOST
+    objref:
+      kind: Service
+      name: mongodb
+      apiVersion: v1
+    fieldref:
+      fieldpath: metadata.name
+  - name: POSTGRES_HOST
+    objref:
+      kind: Service
+      name: postgres
+      apiVersion: v1
+    fieldref:
+      fieldpath: metadata.name
+  - name: AIRFLOW_HOST
+    objref:
+      kind: Service
+      name: airflow-webserver
+      apiVersion: v1
+    fieldref:
+      fieldpath: metadata.name
+
+# Image replacement
+images:
+  - name: mongodb
+    newName: mongo
+    newTag: "6.0"
+  - name: postgres
+    newName: postgres
+    newTag: "15-alpine"
+  - name: airflow
+    newName: apache/airflow
+    newTag: "latest"
+
+# Replicas override
+replicas:
+  - name: mongodb
+    count: 1
+  - name: postgres
+    count: 1
+  - name: airflow-webserver
+    count: 1
+  - name: airflow-scheduler
+    count: 1

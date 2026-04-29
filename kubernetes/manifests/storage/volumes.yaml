@@ -1,0 +1,152 @@
+---
+# PersistentVolume for MongoDB data
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mongodb-pv
+  namespace: trips-ticks
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /var/data/mongodb
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - minikube  # Replace with your node name
+---
+# PersistentVolumeClaim for MongoDB
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-pvc
+  namespace: trips-ticks
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 10Gi
+---
+# PersistentVolume for PostgreSQL data
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: postgres-pv
+  namespace: trips-ticks
+spec:
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /var/data/postgres
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - minikube  # Replace with your node name
+---
+# PersistentVolumeClaim for PostgreSQL
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+  namespace: trips-ticks
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 20Gi
+---
+# PersistentVolume for Airflow DAGs
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airflow-dags-pv
+  namespace: trips-ticks
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /var/data/airflow/dags
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - minikube  # Replace with your node name
+---
+# PersistentVolumeClaim for Airflow DAGs
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-dags-pvc
+  namespace: trips-ticks
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 5Gi
+---
+# PersistentVolume for Airflow Logs
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: airflow-logs-pv
+  namespace: trips-ticks
+spec:
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteMany
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: local-storage
+  local:
+    path: /var/data/airflow/logs
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - minikube  # Replace with your node name
+---
+# PersistentVolumeClaim for Airflow Logs
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: airflow-logs-pvc
+  namespace: trips-ticks
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: local-storage
+  resources:
+    requests:
+      storage: 10Gi

@@ -1,0 +1,89 @@
+---
+# MongoDB ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongodb-config
+  namespace: trips-ticks
+data:
+  mongodb.conf: |
+    # MongoDB server configuration
+    storage:
+      engine: wiredTiger
+      journal:
+        enabled: true
+    net:
+      bindIp: 0.0.0.0
+      port: 27017
+    replication:
+      replSetName: rs0
+    security:
+      authorization: enabled
+---
+# PostgreSQL ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+  namespace: trips-ticks
+data:
+  postgresql.conf: |
+    # PostgreSQL server configuration
+    max_connections = 100
+    shared_buffers = 256MB
+    effective_cache_size = 1GB
+    maintenance_work_mem = 64MB
+    checkpoint_completion_target = 0.9
+    wal_buffers = 16MB
+    default_statistics_target = 100
+    random_page_cost = 1.1
+    effective_io_concurrency = 200
+    work_mem = 2621kB
+    min_wal_size = 1GB
+    max_wal_size = 4GB
+  pg_hba.conf: |
+    # PostgreSQL client authentication configuration
+    local   all             all                                     trust
+    host    all             all             127.0.0.1/32            md5
+    host    all             all             ::1/128                 md5
+    host    all             all             0.0.0.0/0               md5
+---
+# Airflow ConfigMap
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airflow-config
+  namespace: trips-ticks
+data:
+  airflow.cfg: |
+    # Airflow configuration
+    [core]
+    dags_folder = /home/airflow/dags
+    logs_folder = /home/airflow/logs
+    base_log_folder = /home/airflow/logs
+    executor = LocalExecutor
+    sql_alchemy_conn = postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+    load_examples = False
+    [webserver]
+    enable_proxy_fix = True
+    authenticate = False
+    expose_config = False
+    [scheduler]
+    dag_dir_list_interval = 300
+---
+# Application ConfigMap for Trips and Ticks
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: app-config
+  namespace: trips-ticks
+data:
+  environment: production
+  log_level: INFO
+  mongodb_host: mongodb
+  mongodb_port: "27017"
+  mongodb_db: trips_ticks_db
+  postgres_host: postgres
+  postgres_port: "5432"
+  postgres_db: trips_ticks_analytics
+  airflow_webserver_url: http://airflow-webserver:8080

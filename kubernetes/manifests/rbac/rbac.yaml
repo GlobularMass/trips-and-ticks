@@ -1,0 +1,76 @@
+---
+# Namespace
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: trips-ticks
+---
+# ServiceAccount for Airflow
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: airflow
+  namespace: trips-ticks
+---
+# ClusterRole for Airflow
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: airflow
+spec:
+  rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "create", "delete", "patch"]
+  - apiGroups: [""]
+    resources: ["pods/logs"]
+    verbs: ["get", "list"]
+  - apiGroups: ["batch"]
+    resources: ["jobs"]
+    verbs: ["get", "list", "watch", "create", "delete"]
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get"]
+---
+# ClusterRoleBinding for Airflow
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: airflow
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: airflow
+subjects:
+- kind: ServiceAccount
+  name: airflow
+  namespace: trips-ticks
+---
+# NetworkPolicy to allow traffic between services
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-internal
+  namespace: trips-ticks
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          name: trips-ticks
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          name: trips-ticks
+  - to:
+    - namespaceSelector: {}
+    ports:
+    - protocol: TCP
+      port: 53
+    - protocol: UDP
+      port: 53

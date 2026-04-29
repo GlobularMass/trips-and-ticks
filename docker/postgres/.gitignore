@@ -1,0 +1,36 @@
+# Environment variables (contains sensitive credentials)
+.env
+.env.local
+.env.*.local
+
+# PostgreSQL data (large files, should not be in version control)
+postgres_data/*
+!postgres_data/.gitkeep
+
+# PostgreSQL logs
+postgres_logs/*
+!postgres_logs/.gitkeep
+
+# Backups
+backups/*
+!backups/.gitkeep
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SQL dumps
+*.sql
+*.dump

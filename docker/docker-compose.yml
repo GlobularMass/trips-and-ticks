@@ -35,6 +35,112 @@ services:
       retries: 5
       start_period: 40s
 
+  # PostgreSQL Database (shared by multiple services)
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-container
+    restart: unless-stopped
+    env_file: ./postgres/postgres_config/.env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_INITDB_ARGS: ""
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./postgres/postgres_config:/etc/postgresql/config
+    networks:
+      - postgres-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200m"
+        max-file: "3"
+
+  # Apache Airflow Webserver
+  airflow-webserver:
+    image: apache/airflow:latest
+    container_name: airflow-webserver
+    restart: unless-stopped
+    env_file: 
+      - ./postgres/postgres_config/.env
+      - ./airflow/airflow_config/.env
+    environment:
+      AIRFLOW_HOME: ${AIRFLOW_HOME:-/home/airflow}
+      AIRFLOW__CORE__DAGS_FOLDER: ${AIRFLOW__CORE__DAGS_FOLDER:-/home/airflow/dags}
+      AIRFLOW__CORE__LOGS_FOLDER: ${AIRFLOW__CORE__LOGS_FOLDER:-/home/airflow/logs}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER:-airflow}:${AIRFLOW_DB_PASSWORD:-airflow}@postgres:5432/${AIRFLOW_DB_NAME:-airflow}
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR:-LocalExecutor}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+      AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX: ${AIRFLOW__WEBSERVER__ENABLE_PROXY_FIX:-True}
+      AIRFLOW__WEBSERVER__SECRET_KEY: ${AIRFLOW__WEBSERVER__SECRET_KEY}
+    ports:
+      - "${AIRFLOW_WEBSERVER_PORT:-8080}:8080"
+    volumes:
+      - ./airflow/airflow_dags:/home/airflow/dags
+      - ./airflow/airflow_logs:/home/airflow/logs
+      - ./airflow/airflow_config:/home/airflow/config
+    networks:
+      - postgres-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: webserver
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200m"
+        max-file: "3"
+
+  # Apache Airflow Scheduler
+  airflow-scheduler:
+    image: apache/airflow:latest
+    container_name: airflow-scheduler
+    restart: unless-stopped
+    env_file: 
+      - ./postgres/postgres_config/.env
+      - ./airflow/airflow_config/.env
+    environment:
+      AIRFLOW_HOME: ${AIRFLOW_HOME:-/home/airflow}
+      AIRFLOW__CORE__DAGS_FOLDER: ${AIRFLOW__CORE__DAGS_FOLDER:-/home/airflow/dags}
+      AIRFLOW__CORE__LOGS_FOLDER: ${AIRFLOW__CORE__LOGS_FOLDER:-/home/airflow/logs}
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://${AIRFLOW_DB_USER:-airflow}:${AIRFLOW_DB_PASSWORD:-airflow}@postgres:5432/${AIRFLOW_DB_NAME:-airflow}
+      AIRFLOW__CORE__EXECUTOR: ${AIRFLOW__CORE__EXECUTOR:-LocalExecutor}
+      AIRFLOW__CORE__FERNET_KEY: ${AIRFLOW__CORE__FERNET_KEY}
+    volumes:
+      - ./airflow/airflow_dags:/home/airflow/dags
+      - ./airflow/airflow_logs:/home/airflow/logs
+      - ./airflow/airflow_config:/home/airflow/config
+    networks:
+      - postgres-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: scheduler
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "200m"
+        max-file: "3"
+
 networks:
   mongodb-network:
     driver: bridge
+  postgres-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

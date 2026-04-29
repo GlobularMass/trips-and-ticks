@@ -1,0 +1,29 @@
+# Environment variables (contains sensitive credentials)
+.env
+.env.local
+.env.*.local
+
+# Airflow data and logs (large files, should not be in version control)
+airflow_dags/*.log
+airflow_logs/*
+!airflow_logs/.gitkeep
+
+# Airflow temp files
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+.dockerignore
