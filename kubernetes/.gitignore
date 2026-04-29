@@ -1,0 +1,21 @@
+# Kubernetes Environment Configuration
+# DO NOT commit .env files to version control!
+.env
+.env.local
+.env.*.local
+
+# Generated secrets file
+manifests/config/secrets.yaml
+
+# Temporary files
+*.tmp
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db

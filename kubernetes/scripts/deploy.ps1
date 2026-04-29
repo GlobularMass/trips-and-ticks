@@ -94,6 +94,17 @@ volumeBindingMode: WaitForFirstConsumer
 function Deploy-Kustomize {
     Write-InfoLog "Deploying using kubectl kustomize..."
     
+    # Generate secrets from environment variables
+    Write-InfoLog "Generating secrets from environment variables..."
+    try {
+        & ".\scripts\generate-secrets.ps1"
+    } catch {
+        Write-ErrorLog "Failed to generate secrets: $_"
+        Write-ErrorLog "Make sure you have a .env file or environment variables set"
+        Write-ErrorLog "Run .\scripts\generate-env.ps1 to create a .env file"
+        exit 1
+    }
+    
     kubectl apply -k $KUSTOMIZE_DIR
     
     Write-InfoLog "Kustomize deployment complete"

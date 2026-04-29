@@ -247,7 +247,7 @@ Date Completed: April 27, 2026
 
 - [x] **Configuration**
   - [x] Environment variables
-  - [x] Credentials management
+  - [x] Credentials management (environment-based secrets generation)
   - [x] Resource adjustment
   - [x] Custom configurations
 

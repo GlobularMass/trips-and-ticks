@@ -107,7 +107,7 @@ kubernetes/
 ├── 📦 Manifests (unchanged)
 │   ├── config/
 │   │   ├── configmaps.yaml
-│   │   └── secrets.yaml
+│   │   └── secrets.yaml              ← Generated from .env
 │   ├── rbac/
 │   │   └── rbac.yaml
 │   ├── services/

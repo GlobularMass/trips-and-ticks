@@ -120,7 +120,7 @@ trips-and-ticks/kubernetes/
 ├── manifests/
 │   ├── config/
 │   │   ├── configmaps.yaml           # App configuration
-│   │   └── secrets.yaml              # Credentials
+│   │   └── secrets.yaml              # Credentials (generated)
 │   ├── rbac/
 │   │   └── rbac.yaml                 # Security & permissions
 │   ├── services/

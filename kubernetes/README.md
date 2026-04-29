@@ -143,6 +143,45 @@ kubectl get nodes
 - Ensure kubectl is configured with proper context
 - Verify cluster access: `kubectl cluster-info`
 
+## Environment Setup
+
+Before deploying, you need to set up environment variables for database credentials and Airflow configuration.
+
+### Option 1: Generate .env file automatically
+
+**Windows (PowerShell):**
+```powershell
+# Generate secure random credentials
+.\scripts\generate-env.ps1
+
+# Review the generated .env file
+Get-Content .env
+```
+
+**Linux/macOS (Bash):**
+```bash
+# Generate secure random credentials
+./scripts/generate-env.sh
+
+# Review the generated .env file
+cat .env
+```
+
+### Option 2: Create .env file manually
+
+Copy the example file and edit the values:
+```bash
+cp .env.example .env
+# Edit .env with your preferred credentials
+```
+
+### Security Notes
+
+- **DO NOT commit the `.env` file to version control!**
+- The deployment scripts will automatically generate Kubernetes secrets from your `.env` file
+- For production, use strong, unique passwords
+- Consider using Kubernetes secrets management solutions like Sealed Secrets
+
 ## Directory Structure
 
 ```
@@ -152,7 +191,7 @@ kubernetes/
 ├── manifests/
 │   ├── config/
 │   │   ├── configmaps.yaml           # Application configuration
-│   │   └── secrets.yaml              # Sensitive credentials
+│   │   └── secrets.yaml              # Sensitive credentials (generated)
 │   ├── rbac/
 │   │   └── rbac.yaml                 # ServiceAccounts, Roles, RoleBindings
 │   ├── services/
@@ -239,9 +278,11 @@ EOF
 ### Step 2: Deploy Configuration
 
 ```bash
-# Deploy ConfigMaps and Secrets
+# Deploy ConfigMaps
 kubectl apply -f manifests/config/configmaps.yaml
-kubectl apply -f manifests/config/secrets.yaml
+
+# Note: secrets.yaml is generated automatically by deployment scripts
+# from your .env file and should not be applied manually
 ```
 
 ### Step 3: Deploy Storage
@@ -312,15 +353,17 @@ Key environment variables in `manifests/config/configmaps.yaml`:
 
 ### Credentials
 
-Credentials are stored in `manifests/config/secrets.yaml`. Default values:
+Credentials are managed through environment variables and automatically generated into `manifests/config/secrets.yaml` by the deployment scripts. 
+
+**Default values (can be overridden in .env file):**
 
 **MongoDB:**
 - Username: `admin`
-- Password: `change-me-in-production`
+- Password: Auto-generated secure password
 
 **PostgreSQL:**
 - Admin Username: `postgres`
-- Admin Password: `change-me-in-production`
+- Admin Password: Auto-generated secure password
 - Airflow Username: `airflow`
 - Airflow Password: `airflow`
 

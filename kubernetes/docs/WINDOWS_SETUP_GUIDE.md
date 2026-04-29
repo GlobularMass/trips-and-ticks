@@ -102,6 +102,23 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
 ```
 
+### Step 4: Generate Environment Configuration
+
+Generate secure credentials for your deployment:
+
+```powershell
+# Navigate to kubernetes directory
+cd C:\Users\YourUsername\Documents\Development\trips-and-ticks\kubernetes
+
+# Generate .env file with secure random credentials
+.\scripts\generate-env.ps1
+
+# Review the generated credentials
+Get-Content .env
+```
+
+**Security Note:** The `.env` file contains sensitive information. **DO NOT commit it to version control!**
+
 ## Using PowerShell Scripts
 
 ### Running the Deployment Script

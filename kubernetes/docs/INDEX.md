@@ -145,7 +145,7 @@ scripts/
 manifests/
 ├── config/
 │   ├── configmaps.yaml
-│   └── secrets.yaml
+│   └── secrets.yaml              ← Generated from .env
 ├── rbac/
 │   └── rbac.yaml
 ├── services/

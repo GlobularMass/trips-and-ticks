@@ -72,6 +72,15 @@ EOF
 deploy_kustomize() {
     log_info "Deploying using kubectl kustomize..."
     
+    # Generate secrets from environment variables
+    log_info "Generating secrets from environment variables..."
+    if ! ./scripts/generate-secrets.sh; then
+        log_error "Failed to generate secrets"
+        log_error "Make sure you have a .env file or environment variables set"
+        log_error "Run ./scripts/generate-env.sh to create a .env file"
+        exit 1
+    fi
+    
     kubectl apply -k $KUSTOMIZE_DIR
     
     log_info "Kustomize deployment complete"
