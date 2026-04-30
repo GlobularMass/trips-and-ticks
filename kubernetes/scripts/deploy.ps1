@@ -173,21 +173,46 @@ function Wait-ForDeployments {
 function Show-ServiceURLs {
     Write-InfoLog "Service URLs:"
     
+    # Load environment variables from .env file if it exists
+    $envFile = ".env"
+    if (Test-Path $envFile) {
+        Get-Content $envFile | ForEach-Object {
+            if ($_ -match '^\s*([^#][^=]+)=(.*)$') {
+                $key = $matches[1].Trim()
+                $value = $matches[2].Trim()
+                [System.Environment]::SetEnvironmentVariable($key, $value, 'Process')
+            }
+        }
+    }
+    
+    # Get credentials from environment variables with defaults
+    $mongoUser = $env:MONGODB_ADMIN_USER
+    if (-not $mongoUser) { $mongoUser = "admin" }
+    
+    $mongoPassword = $env:MONGODB_ADMIN_PASSWORD
+    if (-not $mongoPassword) { $mongoPassword = "set-env-variable" }
+    
+    $postgresUser = $env:POSTGRES_ADMIN_USER
+    if (-not $postgresUser) { $postgresUser = "postgres" }
+    
+    $postgresPassword = $env:POSTGRES_ADMIN_PASSWORD
+    if (-not $postgresPassword) { $postgresPassword = "set-env-variable" }
+    
     # Get Airflow WebUI URL
     Write-Host ""
     Write-Host "Airflow WebUI:" -ForegroundColor $ColorInfo
     Write-Host "  - Local: http://localhost:8080 (after port-forward)"
-    Write-Host "  - In-cluster: http://airflow-webserver.trips-ticks.svc.cluster.local:8080"
+    Write-Host "  - In-cluster: http://airflow-webserver.$NAMESPACE.svc.cluster.local:8080"
     
     # Get MongoDB connection string
     Write-Host ""
     Write-Host "MongoDB connection:" -ForegroundColor $ColorInfo
-    Write-Host "  - mongodb://admin:change-me-in-production@mongodb:27017/admin?authSource=admin"
+    Write-Host "  - mongodb://$mongoUser`:$mongoPassword@mongodb:27017/admin?authSource=admin"
     
     # Get PostgreSQL connection string
     Write-Host ""
     Write-Host "PostgreSQL connection:" -ForegroundColor $ColorInfo
-    Write-Host "  - postgresql://postgres:change-me-in-production@postgres:5432/trips_ticks_analytics"
+    Write-Host "  - postgresql://$postgresUser`:$postgresPassword@postgres:5432/trips_ticks_analytics"
     
     Write-Host ""
     Write-Host "To set up port forwarding, run:" -ForegroundColor $ColorWarn
@@ -195,7 +220,7 @@ function Show-ServiceURLs {
 }
 
 # Setup port forwarding
-function Setup-PortForwarding {
+function Start-PortForwarding {
     Write-InfoLog "Setting up port forwarding for local testing..."
     
     Write-Host ""
@@ -232,7 +257,7 @@ function Main {
     Show-ServiceURLs
     
     if ($PortForward -or $DeploymentMethod -in @('--port-forward', '--pf')) {
-        Setup-PortForwarding
+        Start-PortForwarding
     }
     
     Write-Host ""

@@ -137,17 +137,32 @@ wait_for_deployments() {
 get_service_urls() {
     log_info "Service URLs:"
     
+    # Load environment variables from .env file if it exists
+    if [ -f ".env" ]; then
+        set -a
+        source .env
+        set +a
+    fi
+    
+    # Get credentials from environment variables with defaults
+    MONGO_USER=${MONGODB_ADMIN_USER:-admin}
+    MONGO_PASSWORD=${MONGODB_ADMIN_PASSWORD:-set-env-variable}
+    POSTGRES_USER=${POSTGRES_ADMIN_USER:-postgres}
+    POSTGRES_PASSWORD=${POSTGRES_ADMIN_PASSWORD:-set-env-variable}
+    
     # Get Airflow WebUI URL
     log_info "Airflow WebUI:"
+    echo "  - Local: http://localhost:8080 (after port-forward)"
+    echo "  - In-cluster: http://airflow-webserver.$NAMESPACE.svc.cluster.local:8080"
     kubectl get svc airflow-webserver -n $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || echo "LoadBalancer IP pending (minikube: kubectl port-forward)"
     
     # Get MongoDB connection string
     log_info "MongoDB connection:"
-    echo "mongodb://admin:change-me-in-production@mongodb:27017/admin?authSource=admin"
+    echo "mongodb://$MONGO_USER:$MONGO_PASSWORD@mongodb:27017/admin?authSource=admin"
     
     # Get PostgreSQL connection string
     log_info "PostgreSQL connection:"
-    echo "postgresql://postgres:change-me-in-production@postgres:5432/trips_ticks_analytics"
+    echo "postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/trips_ticks_analytics"
 }
 
 # Port forward (for local testing)
