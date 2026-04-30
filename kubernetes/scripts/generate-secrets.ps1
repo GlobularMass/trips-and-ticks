@@ -58,19 +58,19 @@ $MONGODB_ADMIN_USER = $env:MONGODB_ADMIN_USER
 if (-not $MONGODB_ADMIN_USER) { $MONGODB_ADMIN_USER = "admin" }
 
 $MONGODB_ADMIN_PASSWORD = $env:MONGODB_ADMIN_PASSWORD
-if (-not $MONGODB_ADMIN_PASSWORD) { $MONGODB_ADMIN_PASSWORD = "change-me-in-production" }
+if (-not $MONGODB_ADMIN_PASSWORD) { $MONGODB_ADMIN_PASSWORD = "change-me" }
 
 $POSTGRES_ADMIN_USER = $env:POSTGRES_ADMIN_USER
 if (-not $POSTGRES_ADMIN_USER) { $POSTGRES_ADMIN_USER = "postgres" }
 
 $POSTGRES_ADMIN_PASSWORD = $env:POSTGRES_ADMIN_PASSWORD
-if (-not $POSTGRES_ADMIN_PASSWORD) { $POSTGRES_ADMIN_PASSWORD = "change-me-in-production" }
+if (-not $POSTGRES_ADMIN_PASSWORD) { $POSTGRES_ADMIN_PASSWORD = "change-me" }
 
 $POSTGRES_AIRFLOW_USER = $env:POSTGRES_AIRFLOW_USER
 if (-not $POSTGRES_AIRFLOW_USER) { $POSTGRES_AIRFLOW_USER = "airflow" }
 
 $POSTGRES_AIRFLOW_PASSWORD = $env:POSTGRES_AIRFLOW_PASSWORD
-if (-not $POSTGRES_AIRFLOW_PASSWORD) { $POSTGRES_AIRFLOW_PASSWORD = "airflow" }
+if (-not $POSTGRES_AIRFLOW_PASSWORD) { $POSTGRES_AIRFLOW_PASSWORD = "change-me" }
 
 $AIRFLOW_FERNET_KEY = $env:AIRFLOW_FERNET_KEY
 if (-not $AIRFLOW_FERNET_KEY) {
@@ -82,18 +82,21 @@ if (-not $AIRFLOW_FERNET_KEY) {
         }
     } catch {
         Write-WarnLog "Python not available for fernet key generation, using default"
-        $AIRFLOW_FERNET_KEY = "c_FVuSH6QE6kp-ifBzo0l30TG0aZv_w0"
+        $AIRFLOW_FERNET_KEY = "change-me"
     }
 }
 
 $AIRFLOW_WEBSERVER_SECRET_KEY = $env:AIRFLOW_WEBSERVER_SECRET_KEY
-if (-not $AIRFLOW_WEBSERVER_SECRET_KEY) { $AIRFLOW_WEBSERVER_SECRET_KEY = "change-me-in-production" }
+if (-not $AIRFLOW_WEBSERVER_SECRET_KEY) { $AIRFLOW_WEBSERVER_SECRET_KEY = "change-me" }
 
 $AIRFLOW_ADMIN_USER = $env:AIRFLOW_ADMIN_USER
 if (-not $AIRFLOW_ADMIN_USER) { $AIRFLOW_ADMIN_USER = "airflow" }
 
 $AIRFLOW_ADMIN_PASSWORD = $env:AIRFLOW_ADMIN_PASSWORD
-if (-not $AIRFLOW_ADMIN_PASSWORD) { $AIRFLOW_ADMIN_PASSWORD = "airflow" }
+if (-not $AIRFLOW_ADMIN_PASSWORD) { $AIRFLOW_ADMIN_PASSWORD = "change-me" }
+
+# Construct database URL for Airflow
+$AIRFLOW_DATABASE_URL = "postgresql+psycopg2://$POSTGRES_AIRFLOW_USER`:$POSTGRES_AIRFLOW_PASSWORD@postgres:5432/airflow"
 
 # Generate secrets.yaml content
 $SecretsContent = @"
@@ -132,6 +135,7 @@ type: Opaque
 data:
   fernet-key: $(Convert-ToBase64 $AIRFLOW_FERNET_KEY)
   webserver-secret-key: $(Convert-ToBase64 $AIRFLOW_WEBSERVER_SECRET_KEY)
+  database-url: $(Convert-ToBase64 $AIRFLOW_DATABASE_URL)
   airflow-user: $(Convert-ToBase64 $AIRFLOW_ADMIN_USER)
   airflow-password: $(Convert-ToBase64 $AIRFLOW_ADMIN_PASSWORD)
 "@

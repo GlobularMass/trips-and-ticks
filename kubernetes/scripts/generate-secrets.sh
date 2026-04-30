@@ -49,12 +49,12 @@ base64_encode() {
 
 # Get values from environment variables with defaults
 MONGODB_ADMIN_USER=${MONGODB_ADMIN_USER:-"admin"}
-MONGODB_ADMIN_PASSWORD=${MONGODB_ADMIN_PASSWORD:-"change-me-in-production"}
+MONGODB_ADMIN_PASSWORD=${MONGODB_ADMIN_PASSWORD:-"change-me"}
 
 POSTGRES_ADMIN_USER=${POSTGRES_ADMIN_USER:-"postgres"}
-POSTGRES_ADMIN_PASSWORD=${POSTGRES_ADMIN_PASSWORD:-"change-me-in-production"}
+POSTGRES_ADMIN_PASSWORD=${POSTGRES_ADMIN_PASSWORD:-"change-me"}
 POSTGRES_AIRFLOW_USER=${POSTGRES_AIRFLOW_USER:-"airflow"}
-POSTGRES_AIRFLOW_PASSWORD=${POSTGRES_AIRFLOW_PASSWORD:-"airflow"}
+POSTGRES_AIRFLOW_PASSWORD=${POSTGRES_AIRFLOW_PASSWORD:-"change-me"}
 
 # Generate fernet key if not provided
 if [ -z "$AIRFLOW_FERNET_KEY" ]; then
@@ -66,13 +66,16 @@ if [ -z "$AIRFLOW_FERNET_KEY" ]; then
         log_info "Generated new fernet key using python"
     else
         log_warn "Python not available for fernet key generation, using default"
-        AIRFLOW_FERNET_KEY="c_FVuSH6QE6kp-ifBzo0l30TG0aZv_w0"
+        AIRFLOW_FERNET_KEY="change-me"
     fi
 fi
 
-AIRFLOW_WEBSERVER_SECRET_KEY=${AIRFLOW_WEBSERVER_SECRET_KEY:-"change-me-in-production"}
+AIRFLOW_WEBSERVER_SECRET_KEY=${AIRFLOW_WEBSERVER_SECRET_KEY:-"change-me"}
 AIRFLOW_ADMIN_USER=${AIRFLOW_ADMIN_USER:-"airflow"}
-AIRFLOW_ADMIN_PASSWORD=${AIRFLOW_ADMIN_PASSWORD:-"airflow"}
+AIRFLOW_ADMIN_PASSWORD=${AIRFLOW_ADMIN_PASSWORD:-"change-me"}
+
+# Construct database URL for Airflow
+AIRFLOW_DATABASE_URL="postgresql+psycopg2://${POSTGRES_AIRFLOW_USER}:${POSTGRES_AIRFLOW_PASSWORD}@postgres:5432/airflow"
 
 # Generate secrets.yaml content
 cat > ./manifests/config/secrets.yaml << EOF
@@ -111,6 +114,7 @@ type: Opaque
 data:
   fernet-key: $(base64_encode "$AIRFLOW_FERNET_KEY")
   webserver-secret-key: $(base64_encode "$AIRFLOW_WEBSERVER_SECRET_KEY")
+  database-url: $(base64_encode "$AIRFLOW_DATABASE_URL")
   airflow-user: $(base64_encode "$AIRFLOW_ADMIN_USER")
   airflow-password: $(base64_encode "$AIRFLOW_ADMIN_PASSWORD")
 EOF

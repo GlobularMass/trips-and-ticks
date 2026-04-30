@@ -33,7 +33,10 @@ spec:
         - name: AIRFLOW__CORE__EXECUTOR
           value: LocalExecutor
         - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-          value: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+          valueFrom:
+            secretKeyRef:
+              name: airflow-credentials
+              key: database-url
         - name: AIRFLOW__CORE__FERNET_KEY
           valueFrom:
             secretKeyRef:
@@ -137,7 +140,10 @@ spec:
         - name: AIRFLOW__CORE__EXECUTOR
           value: LocalExecutor
         - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
-          value: postgresql+psycopg2://airflow:airflow@postgres:5432/airflow
+          valueFrom:
+            secretKeyRef:
+              name: airflow-credentials
+              key: database-url
         - name: AIRFLOW__CORE__FERNET_KEY
           valueFrom:
             secretKeyRef:

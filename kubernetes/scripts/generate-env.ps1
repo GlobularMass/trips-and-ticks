@@ -43,7 +43,7 @@ if ((Test-Path $EnvFile) -and -not $Force) {
 Write-InfoLog "Generating secure environment variables..."
 
 # Generate secure random passwords
-function Generate-SecurePassword {
+function New-SecurePassword {
     param([int]$Length = 16)
     $chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*"
     $password = ""
@@ -70,10 +70,10 @@ try {
 }
 
 # Generate secure passwords
-$MongoPassword = Generate-SecurePassword
-$PostgresPassword = Generate-SecurePassword
-$AirflowWebserverKey = Generate-SecurePassword
-$AirflowPassword = Generate-SecurePassword
+$MongoPassword = New-SecurePassword
+$PostgresPassword = New-SecurePassword
+$AirflowWebserverKey = New-SecurePassword
+$AirflowPassword = New-SecurePassword
 
 # Create .env file content
 $EnvContent = @"

@@ -368,16 +368,19 @@ Credentials are managed through environment variables and automatically generate
 - Airflow Password: `airflow`
 
 **Airflow:**
-- Username: `airflow`
-- Password: `airflow`
-- Fernet Key: Auto-generated
+- Admin Username: `admin`
+- Admin Password: Auto-generated secure password
+- Database Connection: Auto-constructed from PostgreSQL Airflow credentials
+- Fernet Key: Auto-generated secure key
 
-⚠️ **IMPORTANT**: Change all default credentials in production environments:
+⚠️ **IMPORTANT**: For production environments:
 
-```bash
-# Edit secrets and update values
-kubectl edit secret postgres-credentials -n trips-ticks
-kubectl edit secret mongodb-credentials -n trips-ticks
+1. **Use strong passwords** in your `.env` file before deployment
+2. **Backup your `.env` file** securely (password manager recommended)
+3. **Never commit `.env` files** to version control
+4. **Rotate credentials** regularly for security
+
+The deployment scripts will automatically create secure Kubernetes secrets from your `.env` file.
 kubectl edit secret airflow-credentials -n trips-ticks
 
 # Or create new secrets with custom values
